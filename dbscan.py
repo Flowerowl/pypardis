@@ -1,9 +1,12 @@
+from operator import add
+
 import pyspark as ps
 import sklearn.cluster as skc
 from scipy.spatial.distance import *
+
 from partition import KDPartitioner
 from aggregator import ClusterAggregator
-from operator import add
+from metrics import geo_distance
 
 LOGGING = False
 
@@ -24,6 +27,7 @@ def dbscan_partition(iterable, params):
     x = np.array([v for (_, __), v in data])
     y = np.array([k for (k, _), __ in data])
     # perform DBSCAN
+    x = squareform(pdist(x, (lambda u,v: geo_distance(u,v))))
     model = skc.DBSCAN(**params)
     c = model.fit_predict(x)
     cores = set(model.core_sample_indices_)
